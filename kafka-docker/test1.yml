@@ -1,0 +1,86 @@
+version: '2'
+services:
+  ZOO-1:
+    image: zoo_3-3-6
+    hostname: ZOO-1
+    ports:
+      - "12181:12181"
+    environment:
+      ZOO_SERVER_ID: 1
+      ZOO_CLIENT_PORT: 12181
+      ZOO_TICK_TIME: 2000
+      ZOO_INIT_LIMIT: 5
+      ZOO_SYNC_LIMIT: 2
+      ZOO_SERVERS: ZOO-1:12888:13888;ZOO-2:22888:23888;ZOO-3:32888:33888
+
+  ZOO-2:
+    image: zoo_3-3-6
+    hostname: ZOO-2
+    ports:
+      - "22181:22181"
+    environment:
+      ZOO_SERVER_ID: 2
+      ZOO_CLIENT_PORT: 22181
+      ZOO_TICK_TIME: 2000
+      ZOO_INIT_LIMIT: 5
+      ZOO_SYNC_LIMIT: 2
+      ZOO_SERVERS: ZOO-1:12888:13888;ZOO-2:22888:23888;ZOO-3:32888:33888
+
+  ZOO-3:
+    image: zoo_3-3-6
+    hostname: ZOO-3
+    ports:
+      - "32181:32181"
+    environment:
+      ZOO_SERVER_ID: 3
+      ZOO_CLIENT_PORT: 32181
+      ZOO_TICK_TIME: 2000
+      ZOO_INIT_LIMIT: 5
+      ZOO_SYNC_LIMIT: 2
+      ZOO_SERVERS: ZOO-1:12888:13888;ZOO-2:22888:23888;ZOO-3:32888:33888
+
+  kafka-1:
+    image: kafka_2-11-1
+    hostname: kafka-1
+    ports:
+      - "19092:19092"
+    depends_on:
+      - ZOO-1
+      - ZOO-2
+      - ZOO-3
+    environment:
+      KAFKA_CREATE_TOPICS: test-topic
+      KAFKA_BROKER_ID: 1
+      KAFKA_LISTENERS : kafka-1:19092
+      KAFKA_ZOOKEEPER_CONNECT: ZOO-1:12181,ZOO-2:12181,ZOO-3:12181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:19092
+ 
+  kafka-2:
+    image: kafka_2-11-1
+    hostname: kafka-2
+    ports:
+      - "29092:29092"
+    depends_on:
+      - ZOO-1
+      - ZOO-2
+      - ZOO-3
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_LISTENERS : 29092 
+      KAFKA_ZOOKEEPER_CONNECT: ZOO-1:12181,ZOO-2:12181,ZOO-3:12181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:29092
+ 
+  kafka-3:
+    image: kafka_2-11-1
+    hostname: kafka-3
+    ports:
+      - "39092:39092"
+    depends_on:
+      - ZOO-1
+      - ZOO-2
+      - ZOO-3
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_LISTENERS : 39092
+      KAFKA_ZOOKEEPER_CONNECT: ZOO-1:12181,ZOO-2:12181,ZOO-3:12181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3:39092
